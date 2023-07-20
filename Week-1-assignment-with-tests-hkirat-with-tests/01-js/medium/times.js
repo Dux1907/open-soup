@@ -8,5 +8,14 @@ Hint - use Date class exposed in JS
 */
 
 function calculateTime(n) {
-    return 0.01;
+  let a = 0;
+  let startTime = new Date().getTime();
+  for (var i = 0; i < n; i++) a += i;
+  let endTime = new Date().getTime();
+  console.log(endTime - startTime);
+}
+
+for (var i = 0; i < 3; i++) {
+  let n = [100, 10000000, 1000000000];
+  calculateTime(n[i]);
 }
