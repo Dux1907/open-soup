@@ -41,8 +41,9 @@
  */
 const express = require("express");
 const bodyParser = require("body-parser");
+const fs = require("fs");
 const app = express();
-let activities = [];
+
 let number = 1;
 app.use(bodyParser.json());
 
@@ -51,47 +52,92 @@ app.get("/", function (req, res) {
 });
 
 app.get("/todos", function (req, res) {
-  res.status(200).json(activities);
+  //res.status(200).json(activities);
+  fs.readFile("./files/a.txt", "utf-8", function (err, data) {
+    if (err) throw err;
+    else res.status(200).json(JSON.parse(data));
+  });
 });
 
 app.get("/todos/:id", function (req, res) {
-  var id = parseInt(req.params.id);
-  var todo = activities.find((todos) => todos.id == id);
-  if (todo) res.status(200).json(todo);
-  else res.status(404).send("Id not found");
+  var id = req.params.id;
+  fs.readFile("./files/a.txt", "utf-8", function (err, data) {
+    if (err) throw err;
+    else {
+      var todo = JSON.parse(data).find((todos) => todos.id == id);
+      if (todo) res.status(200).json(todo);
+      else res.status(404).send("Id not found");
+    }
+  });
+  // var todo = activities.find((todos) => todos.id == id);
 });
 app.post("/todos", function (req, res) {
-  const newData = {
-    id: number++,
+  var newData = {
     title: req.body.title,
-    description: req.body.description,
     completed: req.body.completed,
-  };
-  activities.push(newData);
-  res.status(201).send(newData);
+    description: req.body.description,
+    id: number++
+  }
+  fs.readFile("./files/a.txt", "utf-8", function (err, data) {
+    if (err) throw err;
+    else {
+      var todo = JSON.parse(data);
+      todo.push(newData);
+      fs.writeFile("./files/a.txt", JSON.stringify(todo), "utf-8", function (err) {
+        if (err) throw err;
+        else res.status(201).send(newData);
+      });
+    }
+  });
 });
 
 app.put("/todos/:id", function (req, res) {
-  var id = parseInt(req.params.id);
-  const updatedData = {
-    title: req.body.title,
-    description: req.body.description,
-    completed: req.body.completed,
-  };
-  var a = activities.findIndex((t) => t.id == id);
-  if (a != -1) {
-    updatedData.id = id;
-    res.status(200).json(updatedData);
-    activities[a] = updatedData;
-  } else res.status(404).send("Not found!");
+  var id = req.params.id;
+  const updatedData = req.body;
+  updatedData.id = id;
+  fs.readFile("./files/a.txt", "utf-8", function (err, data) {
+    if (err) throw err;
+    else {
+     var todo = JSON.parse(data);
+      const find = todo.findIndex((t) => t.id == id);
+      if (find != -1) {
+        todo[find] = updatedData;
+        fs.writeFile("./files/a.txt", JSON.stringify(todo), "utf-8", function (err) {
+          if (err) throw err;
+          else res.status(200).json(updatedData);
+        });
+      } else res.status(404).send("Not found!");
+    }
+  });
+  // var a = activities.findIndex((t) => t.id == id);
+  // if (a != -1) {
+  //   updatedData.id = id;
+  //   res.status(200).json(updatedData);
+  //   activities[a] = updatedData;
+  // } else res.status(404).send("Not found!");
 });
 
 app.delete("/todos/:id", function (req, res) {
-  var id = parseInt(req.params.id);
-  var a = activities.find((t) => t.id == id);
-  activities = activities.filter((t) => t.id != id);
-  if (a) res.status(200).json(a);
-  else res.status(404).send("Not found");
+  var id = req.params.id;
+  fs.readFile("./files/a.txt", "utf-8", function (err, data) {
+    if (err) throw err;
+    else {
+      const todo = JSON.parse(data);
+      const find = todo.findIndex((t) => t.id == id);
+      if (find != -1) {
+        const final = todo.splice(find, 1);
+        fs.writeFile("./files/a.txt", JSON.stringify(final), "utf-8", function (err) {
+          if (err) throw err;
+          else
+          res.status(200).send("Deleted successfully.");
+        });
+      } else res.status(404).send("Not found!");
+    } 
+  });
+  // var a = activities.find((t) => t.id == id);
+  // activities = activities.filter((t) => t.id != id);
+  // if (a) res.status(200).json(a);
+  // else res.status(404).send("Not found");
 });
 
 app.all("*", (req, res, next) => {
