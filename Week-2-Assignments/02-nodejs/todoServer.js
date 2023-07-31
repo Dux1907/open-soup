@@ -53,7 +53,7 @@ app.get("/", function (req, res) {
 
 app.get("/todos", function (req, res) {
   //res.status(200).json(activities);
-  fs.readFile("./files/a.txt", "utf-8", function (err, data) {
+  fs.readFile("./todoServer2.txt", "utf-8", function (err, data) {
     if (err) throw err;
     else res.status(200).json(JSON.parse(data));
   });
@@ -61,7 +61,7 @@ app.get("/todos", function (req, res) {
 
 app.get("/todos/:id", function (req, res) {
   var id = req.params.id;
-  fs.readFile("./files/a.txt", "utf-8", function (err, data) {
+  fs.readFile("./todoServer2.txt", "utf-8", function (err, data) {
     if (err) throw err;
     else {
       var todo = JSON.parse(data).find((todos) => todos.id == id);
@@ -72,18 +72,14 @@ app.get("/todos/:id", function (req, res) {
   // var todo = activities.find((todos) => todos.id == id);
 });
 app.post("/todos", function (req, res) {
-  var newData = {
-    title: req.body.title,
-    completed: req.body.completed,
-    description: req.body.description,
-    id: number++
-  }
-  fs.readFile("./files/a.txt", "utf-8", function (err, data) {
+  var newData = req.body;
+  newData.id = number++;
+  fs.readFile("./todoServer2.txt", "utf-8", function (err, data) {
     if (err) throw err;
     else {
       var todo = JSON.parse(data);
       todo.push(newData);
-      fs.writeFile("./files/a.txt", JSON.stringify(todo), "utf-8", function (err) {
+      fs.writeFile("./todoServer2.txt", JSON.stringify(todo), "utf-8", function (err) {
         if (err) throw err;
         else res.status(201).send(newData);
       });
@@ -95,14 +91,14 @@ app.put("/todos/:id", function (req, res) {
   var id = req.params.id;
   const updatedData = req.body;
   updatedData.id = id;
-  fs.readFile("./files/a.txt", "utf-8", function (err, data) {
+  fs.readFile("./todoServer2.txt", "utf-8", function (err, data) {
     if (err) throw err;
     else {
      var todo = JSON.parse(data);
       const find = todo.findIndex((t) => t.id == id);
       if (find != -1) {
         todo[find] = updatedData;
-        fs.writeFile("./files/a.txt", JSON.stringify(todo), "utf-8", function (err) {
+        fs.writeFile("./todoServer2.txt", JSON.stringify(todo), "utf-8", function (err) {
           if (err) throw err;
           else res.status(200).json(updatedData);
         });
@@ -119,14 +115,14 @@ app.put("/todos/:id", function (req, res) {
 
 app.delete("/todos/:id", function (req, res) {
   var id = req.params.id;
-  fs.readFile("./files/a.txt", "utf-8", function (err, data) {
+  fs.readFile("./todoServer2.txt", "utf-8", function (err, data) {
     if (err) throw err;
     else {
       const todo = JSON.parse(data);
       const find = todo.findIndex((t) => t.id == id);
       if (find != -1) {
         const final = todo.splice(find, 1);
-        fs.writeFile("./files/a.txt", JSON.stringify(final), "utf-8", function (err) {
+        fs.writeFile("./todoServer2.txt", JSON.stringify(final), "utf-8", function (err) {
           if (err) throw err;
           else
           res.status(200).send("Deleted successfully.");
