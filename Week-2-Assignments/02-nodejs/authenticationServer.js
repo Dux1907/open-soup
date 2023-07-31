@@ -27,11 +27,88 @@
   - For any other route not defined in the server return 404
 
   Testing the server - run `npm run test-authenticationServer` command in terminal
+   write your logic here, Don't WRITE app.listen(3000) when you're running tests, the tests will automatically start the server
  */
 
-const express = require("express")
-const PORT = 3000;
+const express = require("express");
 const app = express();
-// write your logic here, DONT WRITE app.listen(3000) when you're running tests, the tests will automatically start the server
+const fs = require("fs");
+const bodyParser = require("body-parser");
+app.use(bodyParser.json());
+app.post("/signup", function (req, res) {
+  var updatedData = req.body;
+  updatedData.id = Math.floor(Math.random() * 1000 + 1);
+  fs.readFile("./storeData2.txt", "utf-8", function (err, data) {
+    if (err) throw err;
+    var obj = JSON.parse(data);
+    var locator = obj.filter((t) => t.username == updatedData.username);
+    if (locator.length > 0) {
+      res.status(400).send();
+    } else {
+      obj.push(updatedData);
+      fs.writeFile(
+        "./storeData2.txt",
+        JSON.stringify(obj),
+        "utf-8",
+        function (err) {
+          if (err) throw err;
+          else res.status(201).send("Signup successful");
+        }
+      );
+    }
+  });
+});
+app.post("/login", function (req, res) {
+  var loginData = req.body;
+  fs.readFile("./storeData2.txt", "utf-8", function (err, data) {
+    if (err) throw err;
+    else {
+      var obj = JSON.parse(data);
+      for (let i = 0; i < obj.length; i++) {
+        if (
+          obj[i].username == loginData.username &&
+          obj[i].password == loginData.password
+        )
+          res.status(200).json({
+            firstName: obj[i].firstName,
+            lastName: obj[i].lastName,
+            email: obj[i].email,
+          });
+      }
+    }
+    res.status(401);
+  });
+});
+app.get("/data", function (req, res) {
+  fs.readFile("./storeData2.txt", "utf-8", function (err, data) {
+    if (err) throw err;
+    else {
+      let x = false
+      var obj = JSON.parse(data);
+      for (var i = 0; i < obj.length; i++) {
+        if (obj[i].email == req.headers.email && obj[i].password == req.headers.password) {
+          let output = [];
+          for (var i = 0; i < obj.length; i++) {
+            output.push({
+              firstName: obj[i].firstName,
+              lastName: obj[i].lastName,
+              email: obj[i].email,
+            });
+          }
+          res.json({ users: output });
+          x = true;
+        }
+      }
+      if(!x)
+      res.sendStatus(401);
+    }
+  });
+});
+app.all("*", (res) => {
+  res.status(404);
+});
+app.listen(3010, function () {
+  console.log("set up!");
+});
 
 module.exports = app;
