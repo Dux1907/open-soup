@@ -43,12 +43,12 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const fs = require("fs");
 const app = express();
-
-let number = 1;
+const cors = require('cors')
+app.use(cors())
 app.use(bodyParser.json());
-
+let number = 1;
 app.get("/", function (req, res) {
-  res.send("hi kartik");
+  res.send('hi')
 });
 
 app.get("/todos", function (req, res) {
