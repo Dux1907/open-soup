@@ -121,7 +121,8 @@ app.delete("/todos/:id", function (req, res) {
       const todo = JSON.parse(data);
       const find = todo.findIndex((t) => t.id == id);
       if (find != -1) {
-        const final = todo.splice(find, 1);
+        const final = todo.filter((element,index) => index != find)
+       // console.log(JSON.stringify(final) + 'final')
         fs.writeFile("./todoServer2.txt", JSON.stringify(final), "utf-8", function (err) {
           if (err) throw err;
           else

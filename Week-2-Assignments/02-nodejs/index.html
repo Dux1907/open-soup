@@ -1,43 +1,85 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title></title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Todo list</title>
-        <link rel="stylesheet" href="">
-    </head>
-    <body>
-        <div>
-            <h3>Todo title</h3>
-            <input type = 'text'/>
-        </div>
-        <div>
-            <h3>Todo description</h3>
-            <input type = 'text'/>
-        </div>
-        <button onclick = onPress() style = 'margin:1rem'>Send Todo</button>
-        <script>
-            function callbackfn2(response2){
-                console.log(response2)
+
+<head>
+    <meta charset="utf-8">
+    <title>Todo App</title>
+    <link rel="stylesheet" href="">
+</head>
+
+<body>
+    <div>
+        <h3>Todo title</h3>
+        <input type='text' id='title' />
+    </div>
+    <div>
+        <h3>Todo description</h3>
+        <input type='text' id='description' />
+    </div>
+    <button onclick=onPress() type = 'button' style='margin:1rem'>Send Todo</button>
+    <h2>All Todos</h2>
+    <div id='output'>
+    </div>
+    <script>
+        function deleteDone(){
+            console.log('Deleted')
+        }
+        function deleteTodo(id){
+            //console.log(id)
+            fetch('http://localhost:3010/todos/' + id,{
+                method: 'DELETE',
+                headers:{
+                    'Content-Type':'application/json'
+                }
+            }).then(deleteDone)
+            
+        }
+        function callback3(response2) {
+            var output = document.getElementById('output')
+            for(let i = 0 ; i < response2.length ; i++){
+                var child = document.createElement('div')
+                var grandchild1 = document.createElement('span')
+                var grandchild2 = document.createElement('span')
+                var grandchild3 = document.createElement('span')
+                var grandchild4 = document.createElement('button')
+                output.appendChild(child)
+                child.appendChild(grandchild1); grandchild1.innerHTML = response2[i].id + '. '
+                child.appendChild(grandchild2); grandchild2.innerHTML = response2[i].title + '. '
+                child.appendChild(grandchild3); grandchild3.innerHTML = response2[i].description + ' '
+                 child.appendChild(grandchild4); grandchild4.innerHTML = 'Delete'
+                 grandchild4.setAttribute('onclick','deleteTodo(' + response2[i].id + ')')
             }
-            function callbackfn(response){
-                response.json().then(callbackfn2)
-            }
-            function onPress(){
-                fetch('http://localhost:3010/todos',{
-                    method:'POST',
-                    body:JSON.stringify({
-                        title:'workout',
-                        description:'go to workout at 6pm.'
-                    }),
-                    headers:{
-                        "Content-Type":"application/json"
-                    }
-                }).then(callbackfn)
-            }
-        </script>
-    </body>
+        }
+        function callback2(response) {
+            response.json().then(callback3)
+        }
+        function getData() {
+            fetch('http://localhost:3010/todos', {
+                method: 'GET'
+            }).then(callback2)
+        }
+        getData();
+        var title = document.getElementById('title')
+        var description = document.getElementById('description')
+        function callbackfn2(response2) {
+            console.log(response2)
+        }
+        function callbackfn(response) {
+            response.json().then(callbackfn2)
+        }
+        function onPress() {
+            fetch('http://localhost:3010/todos', {
+                method: 'POST',
+                body: JSON.stringify({
+                    title: title.value,
+                    description: description.value
+                }),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }).then(callbackfn)
+        }
+    </script>
+</body>
+
 </html>
