@@ -11,9 +11,9 @@ let COURSES = [];
 
 // Read data from file, or initialize to empty array if file does not exist
 try {
-    ADMINS = JSON.parse(fs.readFileSync('admins.json', 'utf8'));
-    USERS = JSON.parse(fs.readFileSync('users.json', 'utf8'));
-    COURSES = JSON.parse(fs.readFileSync('courses.json', 'utf8'));
+    ADMINS = JSON.parse(fs.readFileSync('./admins.json', 'utf8'));
+    USERS = JSON.parse(fs.readFileSync('./users.json', 'utf8'));
+    COURSES = JSON.parse(fs.readFileSync('./courses.json', 'utf8'));
 } catch {
     ADMINS = [];
     USERS = [];
@@ -49,7 +49,7 @@ app.post('/admin/signup', (req, res) => {
   } else {
     const newAdmin = { username, password };
     ADMINS.push(newAdmin);
-    fs.writeFileSync('admins.json', JSON.stringify(ADMINS));
+    fs.writeFileSync('./admins.json', JSON.stringify(ADMINS));
     const token = jwt.sign({ username, role: 'admin' }, SECRET, { expiresIn: '1h' });
     res.json({ message: 'Admin created successfully', token });
   }
@@ -139,7 +139,7 @@ app.post('/users/courses/:courseId', authenticateJwt, (req, res) => {
 });
 
 app.get('/users/purchasedCourses', authenticateJwt, (req, res) => {
-  const user = USERS.find(u => u.username === req.user.username);
+  const user = USERS.find(u => u.username === f.username);
   if (user) {
     res.json({ purchasedCourses: user.purchasedCourses || [] });
   } else {
