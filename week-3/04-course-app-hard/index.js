@@ -69,7 +69,7 @@ app.post("/admin/courses", authentication, async function (req, res) {
   if (!body.title || !body.description || !body.price)
     res.send("Either of the title,description or price is missing!");
   else {
-    var newCourse = await new courseModel(body);
+    var newCourse = new courseModel(body);
     await newCourse.save();
     res.send("Course created Successfully with id:" + newCourse.id);
   }
@@ -114,42 +114,27 @@ app.get("/users/courses",authentication, async function (req, res) {
   res.send(courses)
 });
 
-app.post("/users/courses/:courseId",authentication, function (req, res) {
-  var id = req.params.courseId;
-  fs.readFile("./solutions/users.json", "utf-8", function (err, data) {
-    if (err) throw err;
-    else {
-      var users = JSON.parse(data);
-      var final = users.findIndex(index => index.username == req.user.payload.username);
-        fs.readFile("./solutions/courses.json", "utf-8", function (err, data) {
-          if (err) throw data;
-          else {
-            const courses = JSON.parse(data);
-            var course = courses.filter((course) => course.id == id);
-            if (course.length > 0) {
-              console.log(course)
-              users[final].purchasedCourses.push(course);
-              fs.writeFile("./solutions/users.json",JSON.stringify(users),"utf-8",function (err) {
-                  if (err) throw err;
-                   else res.send("Purchased Successful!");
-              });
-            }
-            else res.send('Id not found!')
-          }
-        });
+app.post("/users/courses/:courseId",authentication,async function (req, res) {
+  const course = await courseModel.findById(req.params.courseId)
+  if (course) {
+    const user = await userModel.findOne({ username: req.user.payload.username })
+    if (user) {
+      user.purchasedCourses.push(course)
+      await user.save()
+      res.send('Course purchased successfully by ' + req.user.payload.username)
     }
-  });
+    else
+      res.status(404).send('User not found!')
+  }
+  else
+    res.status(403).send('Id not Found!')
 });
-
-app.get("/users/purchasedCourses", authentication, function (req, res) {
-  fs.readFile("./solutions/users.json", "utf-8", function (err, data) {
-    if (err) throw err;
-    else {
-      var users = JSON.parse(data);
-      var final = users.findIndex(index => index.username == req.user.payload.username)
-        res.send(users[final].purchasedCourses);
-    }
-  });
+app.get("/users/purchasedCourses", authentication, async function (req, res) {
+  const user = await userModel.findOne({ username: req.user.payload.username }).populate('purchasedCourses')
+  if(user)
+    res.send(user.purchasedCourses)
+  else
+    res.send('User Not Found!')
 });
 
 app.all("*", (req, res) => {
