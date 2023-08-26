@@ -32,5 +32,5 @@ function findDiff(arr1,arr2){
   }
 }
 
-let diff = findDiff([],[1,2,3,4,5])
+let diff = findDiff([1,2,3,4],[1,2,3])
 console.log(diff)
