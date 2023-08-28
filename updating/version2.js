@@ -18,10 +18,11 @@ function createElement(todo) {
             const child = document.createElement('div')
             const child1 = document.createElement('span')
           const child2 = document.createElement('span')
-          const child3 = document.createElement('span')
+          const child3 = document.createElement('button')
              child1.innerHTML = item.title + ' '
             child2.innerHTML = item.description + ' '
-            child3.innerHTML = item.id
+            child3.innerHTML = 'Delete'
+            child3.setAttribute('onclick',"delete(" + item.id + ")")
             child.appendChild(child1)
             child.appendChild(child2)
             child.appendChild(child3)
