@@ -1,25 +1,23 @@
-function createElement(todo) {
+let vDOM = [];
+
+function createElement(existingDOM) {
   let updated = 0,
     added = 0,
     removed = 0;
   var parent = document.getElementById("main");
-  currentChildren = Array.from(parent.children);
-
-  todo.forEach((item) => {
-    var existingChild = currentChildren.find((child) => {
-      return (child.id == item.id);
+  vDOM.forEach((item) => {
+    var existingChild = existingDOM.find((child) => {
+      return child.id == item.id;
     });
     if (existingChild) {
       updated++;
-      currentChildren = currentChildren.filter(
-        (child) => child.id != item.id
-      );
-      existingChild.children[0].innerHTML = item.title + " ";
-      existingChild.children[1].innerHTML = item.description + " ";
+      existingDOM = existingDOM.filter((child) => child.id != item.id);
+      existingChild.title = item.title + " ";
+      existingChild.description = item.description + " ";
     } else {
       added++;
       const child = document.createElement("div");
-      child.setAttribute('id',item.id)
+      child.setAttribute("id", item.id);
       const child1 = document.createElement("span");
       const child2 = document.createElement("span");
       const child3 = document.createElement("button");
@@ -33,16 +31,27 @@ function createElement(todo) {
       parent.appendChild(child);
     }
   });
-  currentChildren.forEach((child) => {
+  existingDOM.forEach((child) => {
+    var remove = document.querySelector(`[id = '${child.id}']`);
     removed++;
-    parent.removeChild(child);
+    parent.removeChild(remove);
   });
-  console.log(todo.length);
+  console.log(vDOM.length);
   console.log("Updated: " + updated);
   console.log("Added: " + added);
   console.log("Removed: " + removed);
 }
-
+function updatevDOM(todo) {
+  let existingDOM = [...vDOM];
+  vDOM = todo.map((item) => {
+    return {
+      id: item.id,
+      title: item.title,
+      description: item.description,
+    };
+  });
+  createElement(existingDOM);
+}
 setInterval(() => {
   let todo = [];
   let k = Math.floor(Math.random() * 100);
@@ -53,5 +62,5 @@ setInterval(() => {
       id: i + 1,
     });
   }
-  createElement(todo);
+  updatevDOM(todo);
 }, 4000);
