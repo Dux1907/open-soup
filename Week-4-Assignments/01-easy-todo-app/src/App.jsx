@@ -22,7 +22,7 @@ function App() {
               setTodo(data)
             })
       })
-   },1000) 
+   },100) 
   }, [])
   function handleDelete(x) {
     console.log('reached')
@@ -46,7 +46,7 @@ function App() {
               {item.title + '.   '}
               {item.description + '.  '}
               {item.id+ '  '}
-              <button onClick={() => handleDelete(item.id)}style={{ borderRadius: '10px' }} >Delete</button>
+              <button onClick={() => handleDelete(item.id)} style={{ borderRadius: '10px' }} >Delete</button>
             </li>
           );
         })}
