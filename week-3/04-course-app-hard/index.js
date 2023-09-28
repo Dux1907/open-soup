@@ -33,13 +33,13 @@ const authentication = (req, res, next) => {
   const randomString = req.headers.authorization
   if (randomString) {
     const token = randomString.split(' ')[1]
-    jwt.verify(token, { key }, function (err, user) {
-      if (err) return res.status(403).send('Wrong token Credentials!')
+    jwt.verify(token, key , function (err, user) {
+      if (err) return res.status(403).send()
         req.user = user; 
         next()
     })
   }
-  else res.status(401).send('Token not found!')
+  else res.status(401).send()
 }
 
 mongoose.connect(connectionString,{useNewUrlParser:true,useUnifiedTopology:true,dbname:'Courses'})
@@ -60,19 +60,19 @@ app.post("/admin/login", async function (req, res) {
   const admin = await adminModel.findOne({ username, password });
   if (admin) {
     const payload = { username, role: "admin" };
-    const token = jwt.sign({ payload }, { key }, { expiresIn: "1h" });
-    res.send("Login successful as admin with token " + token);
-  } else res.status(404).send("Wrong username or password");
+    const token = jwt.sign( payload,  key, { expiresIn: "1h" });
+    res.status(200).send({token});
+  } else res.status(404).send();
 });
 
 app.post("/admin/courses", authentication, async function (req, res) {
   var body = req.body;
   if (!body.title || !body.description || !body.price)
-    res.send("Either of the title,description or price is missing!");
+    res.status(400).send();
   else {
     var newCourse = new courseModel(body);
     await newCourse.save();
-    res.send("Course created Successfully with id:" + newCourse.id);
+    res.status(200).send({id :newCourse.id});
   }
 });
 
@@ -105,7 +105,7 @@ app.post("/users/login", async function (req, res) {
   const user = await userModel.findOne({ username, password });
   if (user) {
     const payload = { username, role: "user" };
-    const token = jwt.sign({ payload }, { key }, { expiresIn: "1h" });
+    const token = jwt.sign( payload ,  key , { expiresIn: "1h" });
     res.send("Login successful as user with token " + token);
   } else res.status(404).send("Wrong username or password");
 });
