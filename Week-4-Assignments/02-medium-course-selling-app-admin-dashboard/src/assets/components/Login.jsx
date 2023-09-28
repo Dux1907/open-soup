@@ -3,7 +3,32 @@ import Card from "@mui/material/Card";
 import CustomAppBar from "./CustomAppBar";
 import { Typography } from "@mui/material";
 import Button from "@mui/material/Button";
+import { useState } from "react";
 const Login = () => {
+  const [username, setUsername] = useState();
+  const [password, setPassword] = useState();
+  const [validation, showValidation] = useState(false);
+  const [message, showMessage] = useState("");
+  const LoginValidation = () => {
+    fetch("http://localhost:3001/admin/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        username,
+        password,
+      },
+    })
+      .then((response) => {
+        if (response.status == 200) {
+          window.location.replace("http://localhost:5173/courses");
+        } else {
+          showValidation(true);
+          showMessage("Invalid Credentials!");
+        }
+        return response.json();
+      })
+      .then((data) => localStorage.setItem("username", data.token));
+  };
   return (
     <>
       <div
@@ -34,6 +59,9 @@ const Login = () => {
                 id="standard-basic"
                 label="Username"
                 variant="standard"
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                }}
               />
               <br />
               <TextField
@@ -42,9 +70,15 @@ const Login = () => {
                 label="Password"
                 variant="standard"
                 className="mt-2 mb-4"
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                }}
               />
               <br />
-              <Button variant="outlined">Log In</Button>
+              <Button variant="outlined" onClick={LoginValidation}>
+                Log In
+              </Button>
+              {validation && <p className="m-2 text-danger">{message}</p>}
             </Card>
           </div>
         </div>

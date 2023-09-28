@@ -14,7 +14,7 @@ const Signup = () => {
       username,
       password,
     };
-    fetch("http://localhost:3001/users/signup", {
+    fetch("http://localhost:3001/admin/signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -28,8 +28,6 @@ const Signup = () => {
   };
   return (
     <>
-      {username}
-      {password}
       <div
         className="container-fluid min-vh-100"
         style={{
