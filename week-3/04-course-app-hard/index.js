@@ -1,12 +1,13 @@
 const express = require("express");
-const fs = require("fs");
 const app = express();
 const jwt = require('jsonwebtoken')
 const mongoose = require('mongoose')
+const cors = require('cors')
+app.use(cors())
 app.use(express.json());
-
-const secretKey = 'nothing'
-
+require('dotenv').config()
+const connectionString = process.env.DBNAME
+const key = process.env.SECRETKEY
 const userSchema = new mongoose.Schema({
   username: String,
   password: String,
@@ -32,7 +33,7 @@ const authentication = (req, res, next) => {
   const randomString = req.headers.authorization
   if (randomString) {
     const token = randomString.split(' ')[1]
-    jwt.verify(token, secretKey, function (err, user) {
+    jwt.verify(token, { key }, function (err, user) {
       if (err) return res.status(403).send('Wrong token Credentials!')
         req.user = user; 
         next()
@@ -41,7 +42,7 @@ const authentication = (req, res, next) => {
   else res.status(401).send('Token not found!')
 }
 
-mongoose.connect('mongodb+srv://kartik:kartik19@cluster0.oziiiug.mongodb.net/',{useNewUrlParser:true,useUnifiedTopology:true,dbname:'Courses'})
+mongoose.connect(connectionString,{useNewUrlParser:true,useUnifiedTopology:true,dbname:'Courses'})
 
 app.post("/admin/signup", async function (req, res) {
   const { username, password } = req.body;
@@ -59,7 +60,7 @@ app.post("/admin/login", async function (req, res) {
   const admin = await adminModel.findOne({ username, password });
   if (admin) {
     const payload = { username, role: "admin" };
-    const token = jwt.sign({ payload }, secretKey, { expiresIn: "1h" });
+    const token = jwt.sign({ payload }, { key }, { expiresIn: "1h" });
     res.send("Login successful as admin with token " + token);
   } else res.status(404).send("Wrong username or password");
 });
@@ -104,7 +105,7 @@ app.post("/users/login", async function (req, res) {
   const user = await userModel.findOne({ username, password });
   if (user) {
     const payload = { username, role: "user" };
-    const token = jwt.sign({ payload }, secretKey, { expiresIn: "1h" });
+    const token = jwt.sign({ payload }, { key }, { expiresIn: "1h" });
     res.send("Login successful as user with token " + token);
   } else res.status(404).send("Wrong username or password");
 });

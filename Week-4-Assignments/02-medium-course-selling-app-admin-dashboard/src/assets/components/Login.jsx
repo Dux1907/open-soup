@@ -1,10 +1,8 @@
 import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
+import CustomAppBar from "./CustomAppBar";
 import { Typography } from "@mui/material";
-import { Link } from "react-router-dom";
-import theme from "./Theme";
-import { ThemeProvider } from "@mui/material";
+import Button from "@mui/material/Button";
 const Login = () => {
   return (
     <>
@@ -16,28 +14,7 @@ const Login = () => {
           flexDirection: "column",
         }}
       >
-        <div className="row">
-          <div className="col-1">
-          <ThemeProvider theme={theme}>
-                            <Typography variant="h4" className="m-2">
-                                Udemy
-                            </Typography>
-                        </ThemeProvider>
-          </div>
-
-          <div className="col-11 d-flex justify-content-end">
-          <Link to="/signup">
-              <Button className="m-2" variant="outlined">
-                Sign Up
-              </Button>
-            </Link>
-            <Link to="/login">
-            <Button className="m-2" variant="outlined">
-              Log In
-            </Button>
-            </Link>
-          </div>
-        </div>
+        <CustomAppBar />
         <div className="row justify-content-center align-items-center text-center flex-grow-1">
           <div className="col-lg-4 col-md-7 col-sm-9 col-10">
             <Typography variant="h5">Welcome to Udemy.</Typography>
