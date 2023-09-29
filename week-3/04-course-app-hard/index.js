@@ -67,21 +67,22 @@ app.post("/admin/login", async function (req, res) {
 
 app.post("/admin/courses", authentication, async function (req, res) {
   var body = req.body;
-  if (!body.title || !body.description || !body.price)
+  if (!body.title || !body.description || !body.price || !body.imageLink)
     res.status(400).send();
   else {
     var newCourse = new courseModel(body);
     await newCourse.save();
-    res.status(200).send({id :newCourse.id});
+    console.log({ id: newCourse.id })
+    res.status(200).send({ id: newCourse.id });
   }
 });
 
 app.put("/admin/courses/:courseId",authentication,async function (req, res) {
   var course = await courseModel.findByIdAndUpdate(req.params.courseId,req.body,{new:true})
   if (course) 
-    res.send('Updated Successfully!')
+    res.status(200).send({course})
   else
-    res.status(404).send('Course Not Found!')
+    res.status(404).send()
 });
 
 app.get("/admin/courses", authentication, async function (req, res) {
