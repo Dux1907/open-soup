@@ -35,13 +35,17 @@ const authentication = (req, res, next) => {
     const token = randomString.split(' ')[1]
     jwt.verify(token, key , function (err, user) {
       if (err) return res.status(403).send()
-        req.user = user; 
+      if (user.role == 'admin')
+        req.IsAdmin = true
+      else
+        req.IsUser = true
+        req.user = user;
         next()
+      
     })
   }
   else res.status(401).send()
 }
-
 mongoose.connect(connectionString,{useNewUrlParser:true,useUnifiedTopology:true,dbname:'Courses'})
 
 app.post("/admin/signup", async function (req, res) {
@@ -66,28 +70,38 @@ app.post("/admin/login", async function (req, res) {
 });
 
 app.post("/admin/courses", authentication, async function (req, res) {
-  var body = req.body;
-  if (!body.title || !body.description || !body.price || !body.imageLink)
-    res.status(400).send();
-  else {
-    var newCourse = new courseModel(body);
-    await newCourse.save();
-    console.log({ id: newCourse.id })
-    res.status(200).send({ id: newCourse.id });
+  if (req.IsAdmin) {
+    var body = req.body;
+    if (!body.title || !body.description || !body.price || !body.imageLink)
+      res.status(400).send();
+    else {
+      var newCourse = new courseModel(body);
+      await newCourse.save();
+      console.log({ id: newCourse.id })
+      res.status(200).send({ id: newCourse.id });
+    }
   }
+  else res.status(401)
 });
 
-app.put("/admin/courses/:courseId",authentication,async function (req, res) {
-  var course = await courseModel.findByIdAndUpdate(req.params.courseId,req.body,{new:true})
-  if (course) 
-    res.status(200).send({course})
+app.put("/admin/courses/:courseId", authentication, async function (req, res) {
+  if (req.IsAdmin) {
+    var course = await courseModel.findByIdAndUpdate(req.params.courseId, req.body, { new: true })
+    if (course)
+      res.status(200).send({ course })
+    else
+      res.status(404).send()
+  }
   else
-    res.status(404).send()
+    res.status(401)
 });
 
 app.get("/admin/courses", authentication, async function (req, res) {
-  let courses = await courseModel.find({})
-  res.send(courses)
+  if (req.IsAdmin) {
+    let courses = await courseModel.find({})
+    res.send(courses)
+  }
+  else res.status(401)
 });
 
 app.post("/users/signup", async function (req, res) {
@@ -103,40 +117,54 @@ app.post("/users/signup", async function (req, res) {
 
 app.post("/users/login", async function (req, res) {
   const { username, password } = req.headers;
+  console.log('hi')
   const user = await userModel.findOne({ username, password });
+  console.log('hi2')
   if (user) {
     const payload = { username, role: "user" };
-    const token = jwt.sign( payload ,  key , { expiresIn: "1h" });
-    res.send("Login successful as user with token " + token);
-  } else res.status(404).send("Wrong username or password");
+    const token = jwt.sign(payload, key, { expiresIn: "1h" });
+    console.log('hi3')
+    res.status(200).send({ token });
+  } else res.status(404);
 });
 
-app.get("/users/courses",authentication, async function (req, res) {
-  const courses = await courseModel.find({ published: false })
-  res.send(courses)
+app.get("/users/courses", authentication, async function (req, res) {
+  if (req.IsUser) {
+    const courses = await courseModel.find({})
+    res.send(courses)
+  }
+  else res.status(401)
 });
 
-app.post("/users/courses/:courseId",authentication,async function (req, res) {
-  const course = await courseModel.findById(req.params.courseId)
-  if (course) {
-    const user = await userModel.findOne({ username: req.user.payload.username })
-    if (user) {
-      user.purchasedCourses.push(course)
-      await user.save()
-      res.send('Course purchased successfully by ' + req.user.payload.username)
+app.post("/users/courses/:courseId", authentication, async function (req, res) {
+  if (req.IsUser) {
+    const course = await courseModel.findById(req.params.courseId)
+    console.log(course)
+    if (course) {
+      const user = await userModel.findOne({ username: req.user.username})
+      console.log(user)
+      if (user) {
+        user.purchasedCourses.push(course)
+        await user.save()
+        res.status(200)
+      }
+      else
+        res.status(404)
     }
-    else
-      res.status(404).send('User not found!')
   }
   else
-    res.status(403).send('Id not Found!')
+    res.status(401)
 });
 app.get("/users/purchasedCourses", authentication, async function (req, res) {
-  const user = await userModel.findOne({ username: req.user.payload.username }).populate('purchasedCourses')
-  if(user)
-    res.send(user.purchasedCourses)
+  if (req.IsUser) {
+    const user = await userModel.findOne({ username: req.user.username }).populate('purchasedCourses')
+    if (user)
+      res.send({ courses:user.purchasedCourses })
+    else
+      res.status(404)
+  }
   else
-    res.send('User Not Found!')
+    res.status(401)
 });
 
 app.all("*", (req, res) => {
