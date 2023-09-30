@@ -14,12 +14,12 @@ const CustomAppBar = () => {
           </ThemeProvider>
         </div>
         <div className="col-11 d-flex justify-content-end">
-          <Link to="/signup">
+          <Link to="/user/signup">
             <Button className="m-2" variant="outlined">
               Sign Up
             </Button>
           </Link>
-          <Link to="/login">
+          <Link to="/user/login">
             <Button className="m-2" variant="outlined">
               Log In
             </Button>
