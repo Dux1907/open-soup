@@ -117,15 +117,15 @@ app.post("/users/signup", async function (req, res) {
 
 app.post("/users/login", async function (req, res) {
   const { username, password } = req.headers;
-  console.log('hi')
+  // console.log('hi')
   const user = await userModel.findOne({ username, password });
-  console.log('hi2')
+  // console.log('hi2')
   if (user) {
     const payload = { username, role: "user" };
     const token = jwt.sign(payload, key, { expiresIn: "1h" });
-    console.log('hi3')
+    // console.log('hi3')
     res.status(200).send({ token });
-  } else res.status(404);
+  } else res.status(404).send();
 });
 
 app.get("/users/courses", authentication, async function (req, res) {

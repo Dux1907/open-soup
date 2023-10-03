@@ -27,7 +27,10 @@ const Login = () => {
         }
         return response.json();
       })
-      .then((data) => localStorage.setItem("username", data.token));
+      .then((data) => {
+        console.log(data.json())
+        localStorage.setItem("username", data.token)
+      });
   };
   return (
     <>

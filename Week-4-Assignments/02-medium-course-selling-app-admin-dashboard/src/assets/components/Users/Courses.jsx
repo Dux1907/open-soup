@@ -53,7 +53,7 @@ const Courses = () => {
           <div className="container-fluid min-vh-100">
             <div className="row text-center justify-content-center">
               <h1>Available Courses :</h1>
-              {courses.map((item) => {
+              { courses && courses.map((item) => {
                 let disable;
                 if (purchasedCourses)
                   disable = purchasedCourses.some(
